@@ -311,7 +311,7 @@ body.light .icon-btn{ background:rgba(0,0,0,0.08); }
 
 <script>
 /* ================== CONFIG ================== */
-const CORRECT_PW = "bicudinha"; // Mantido, mas não usado
+const CORRECT_PW = "bicudinha"; // Não usado
 const audio = document.getElementById('audio');
 
 /* ELEMENTS */
@@ -330,29 +330,20 @@ const toggleHearts = document.getElementById('toggleHearts');
 const finalPhrase = document.getElementById('finalPhrase');
 
 
-/* O OVERLAY DE SENHA ESTÁ INVISÍVEL POR PADRÃO.
-   A página principal agora é carregada diretamente, e a música tenta tocar
-   assim que o JS é executado (sujeito às restrições de autoplay do navegador).
-*/
-
-// Tenta tocar a música assim que o script é carregado
-audio.play().catch(e => {
-    if (e.name === 'NotAllowedError') {
-         // O navegador bloqueou o autoplay, o usuário deve clicar no play
-    } else if (e.name === 'NotSupportedError') {
-        alert('O formato do arquivo de música não é suportado pelo seu navegador.');
-    }
-});
-
-
-/* ===== audio player controls (MANTIDO) ===== */
+/* ===== audio player controls (CORRIGIDO PARA SÓ TOCAR AO CLICAR) ===== */
 function togglePlay(){
   if (audio.error) {
      alert('O áudio não pôde ser carregado. Verifique o caminho do arquivo mp3.');
      return;
   }
   if(audio.paused){
-    audio.play();
+    // Tenta tocar apenas aqui, no clique do usuário
+    audio.play().catch(e => {
+        if (e.name !== 'NotAllowedError') {
+             // NotAllowedError ocorre se o navegador bloquear mesmo assim, mas é raro após um clique
+             alert('Erro ao tentar tocar a música. Certifique-se de que o arquivo está acessível.');
+        }
+    });
     playBtn.textContent = '⏸️';
     playMain.textContent = '⏸️ Pausar';
   } else {
@@ -372,8 +363,14 @@ audio.addEventListener('timeupdate', ()=>{
   const pct = (audio.currentTime / audio.duration) * 100;
   progressBar.style.width = pct + '%';
 });
-audio.addEventListener('play', ()=>{ playBtn.textContent = '⏸️'; });
-audio.addEventListener('pause', ()=>{ playBtn.textContent = '▶️'; });
+audio.addEventListener('play', ()=>{ 
+    playBtn.textContent = '⏸️'; 
+    playMain.textContent = '⏸️ Pausar';
+});
+audio.addEventListener('pause', ()=>{ 
+    playBtn.textContent = '▶️'; 
+    playMain.textContent = '▶️ Tocar música';
+});
 
 /* Avisa se o áudio não puder ser carregado */
 audio.addEventListener('error', function(e) {
@@ -520,7 +517,7 @@ function startHearts(){
 function stopHearts(){ clearInterval(heartsInterval); document.querySelectorAll('span').forEach(sp => { if(sp.textContent==='❤') sp.remove(); }); }
 startHearts(); 
 
-/* ===== accessibility: close overlay with ESC (MANTIDO, mas não faz nada útil agora) ===== */
+/* ===== accessibility: close overlay with ESC (MANTIDO) ===== */
 document.addEventListener('keydown', (ev)=>{
   if(ev.key === 'Escape'){
     if(overlay.style.display !== 'none'){
