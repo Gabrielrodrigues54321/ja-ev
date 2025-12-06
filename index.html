@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>J+E Player — Évilin & Jaaziel 💖</title>
+<meta name="description" content="Um cantinho romântico inspirado em players modernos.">
+
+<style>
+/* ================== VARS ================== */
+/* Configuração do Tema Claro */
+body.light {
+  --bg-main: #f0f0f5;
+  --color-text: #222;
+  --color-sub: #555;
+  --accent: #008744; /* Verde escuro */
+  --muted: rgba(0,0,0,0.2);
+  --card-bg: #fff;
+  --card-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  --border-color: rgba(0,0,0,0.08);
+  --player-bg: linear-gradient(90deg, rgba(200,200,200,0.8), rgba(255,255,255,0.95));
+  transition: 0.4s;
+}
+
+/* Variáveis para Tema Escuro (Padrão) */
+:root{
+  --bg-main: linear-gradient(180deg,#0f1724,#071426);
+  --color-text: #e9eef6;
+  --color-sub: rgba(230,240,255,0.72);
+  --accent: #1DB954; /* verde estilo player */
+  --muted: rgba(255,255,255,0.16);
+  --card-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  --card-shadow: 0 8px 30px rgba(2,6,12,0.55);
+  --border-color: rgba(255,255,255,0.02);
+  --player-bg: linear-gradient(90deg, rgba(0,0,0,0.55), rgba(255,255,255,0.02));
+  --radius: 14px;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* ========== RESET & BASE ========== */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background: var(--bg-main);
+  color: var(--color-text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+  padding-bottom:86px; 
+  transition: background 0.4s, color 0.4s;
+}
+
+#theme-toggle {
+  position: fixed; top: 15px; right: 15px; padding: 10px 20px; border-radius: 20px; border: none; background: var(--accent); color: #000; cursor: pointer; z-index: 9999; font-weight: bold;
+}
+
+/* ========== EFEITO PARTÍCULAS NO FUNDO ========== */
+#particles { position: fixed; inset: 0; z-index: 0; }
+
+/* ========== LAYOUT ========== */
+.app { min-height:100vh; display:flex; flex-direction:column; position: relative; z-index: 10; }
+
+/* Top bar (MOBILE OTIMIZATION) */
+.topbar {
+  position:fixed; left:0; right:0; top:0; height:64px; display:flex; align-items:center; gap:12px; padding:10px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
+  backdrop-filter: blur(8px); z-index:1200; border-bottom:1px solid var(--border-color);
+}
+.brand{ display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem; margin-left:6px; }
+.brand .logo {
+  width:34px;height:34px;border-radius:8px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-weight:800;color:#072018;
+  box-shadow: 0 6px 18px rgba(29,185,84,0.08);
+}
+
+/* main content */
+.container{ margin-top:76px; padding:12px; display:grid; grid-template-columns: 1fr; gap:14px; }
+
+/* card style */
+.card{
+  background: var(--card-bg); border-radius: var(--radius); padding:14px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color);
+}
+
+/* hero (MOBILE OTIMIZATION) */
+.hero{ display:flex;gap:12px;align-items:flex-start; /* Alinhamento superior para evitar que o texto fique espremido */ }
+.hero .art{
+  width:100px;height:100px;border-radius:12px;flex:0 0 100px;overflow:hidden;background:var(--card-bg);
+  display:flex;align-items:center;justify-content:center;font-size:0.9rem;color:var(--color-sub);
+}
+.h-sub{color:var(--color-sub);font-size:0.95rem;margin-bottom:10px}
+
+/* controls (MOBILE OTIMIZATION) */
+.controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; /* Força quebra de linha em telas pequenas */ }
+.btn {
+  background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 14px;border-radius:12px;color:inherit;font-weight:700;
+  white-space: nowrap; /* Evita quebra de palavras nos botões */
+}
+body.light .btn { border-color: rgba(0,0,0,0.1); }
+.btn.primary{ background:var(--accent); color:#06140c; border:none; box-shadow: 0 8px 20px rgba(29,185,84,0.08);}
+
+/* gallery */
+.gallery{ 
+  display:flex; gap:8px; overflow-x: auto; 
+  padding-bottom:4px;
+}
+.gallery img{ 
+  width: 140px; 
+  height: 140px;
+  border-radius:12px;
+  object-fit:cover; 
+  flex-shrink: 0; 
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5) 
+}
+
+/* player fixo embaixo (MOBILE OTIMIZATION) */
+.player {
+  position:fixed; left:8px; right:8px; bottom:12px; height:72px; border-radius:14px; 
+  background: var(--player-bg);
+  box-shadow:0 18px 40px rgba(0,0,0,0.6);
+  border: 1px solid var(--border-color);
+  display:flex;align-items:center;gap:12px;padding:10px; z-index:1300; /* Garante que o player está por cima */
+}
+.player .cover{ width:52px;height:52px;border-radius:10px; overflow:hidden; background:var(--card-bg); display:flex;align-items:center;justify-content:center;}
+.player .info{ flex:1; min-width:0}
+.player .title{ font-weight:800; font-size:0.95rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; } /* Ajuste de texto para telas pequenas */
+.player .artist{ color:var(--color-sub); font-size:0.86rem; margin-top:2px}
+.player .controls{ display:flex; align-items:center; gap:10px; margin-left:10px }
+.icon-btn{ width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.04); display:flex;align-items:center;justify-content:center;}
+body.light .icon-btn{ background:rgba(0,0,0,0.08); }
+
+
+/* Desktop tweaks (mantido) */
+@media(min-width:880px){
+  .container{ padding:20px 40px; max-width:1100px; margin:92px auto }
+  .gallery img{ width:200px;height:200px; flex:0 0 200px }
+  .hero .art{ width:160px;height:160px; flex:0 0 160px }
+  .player{ left:40px; right:40px; height:78px }
+}
+
+</style>
+</head>
+<body class="dark">
+
+<button id="theme-toggle">Alternar Tema</button>
+
+<canvas id="particles"></canvas>
+
+<div id="intro">
+  <div class="intro-text">Carregando algo especial...</div>
+</div>
+
+<div id="overlay" class="overlay" aria-hidden="true" style="display: none;">
+  <div class="box">
+    <p id="tryCount" style="margin-top:10px;color:var(--muted);font-size:0.9rem"></p>
+  </div>
+</div>
+
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">JE</div>
+      <div>
+        JE Player
+        <div style="font-size:0.73rem;color:rgba(230,240,255,0.7);font-weight:600">Um cantinho do Jaaziel pra Évilin</div>
+      </div>
+    </div>
+
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <button id="copyLink" class="btn" title="Copiar link">Copiar link</button>
+      <button id="toggleHearts" class="btn" title="Corações">Corações</button>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="card hero" id="inicio">
+      <div class="art">
+        <img id="heroCover" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROJvWCOhmc09TX8sp2FUd9LVRkRpc2CyPvlQ&s" alt="Capa" style="width:100%;height:100%;object-fit:cover;border-radius:12px">
+      </div>
+      <div class="meta">
+        <div class="h-title">Évilin & Jaaziel — Nosso cantinho</div>
+        <div class="h-sub">Um sitezinho inspirado no spotify, memórias e uma carta. Tudo feito com amor, para voce évilin</div>
+
+        <div class="controls">
+          <button id="playMain" class="btn primary">▶️ Tocar música</button>
+          <button id="openGallery" class="btn">📸 Ver Galeria</button>
+          <button id="openMotivos" class="btn">💌 Motivos</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="fotos">
+      <h3 style="margin-bottom:10px">Galeria — Nossas fotos</h3>
+      <div class="gallery" id="gallery">
+        <img src="Untitled foto 2.jpg" alt="foto1" loading="lazy">
+        <img src="Untitled foto 3.jpg" alt="foto2" loading="lazy">
+        <img src="Untitled1.jpg" alt="foto3" loading="lazy">
+        <img src="Untitled2.jpg" alt="foto4" loading="lazy">
+        <img src="Untitled3.jpg" alt="foto5" loading="lazy">
+        <img src="Untitled4.jpg" alt="foto6" loading="lazy">
+        <img src="Untitled5.jpg" alt="foto7" loading="lazy">
+      </div>
+      <p style="opacity:.8;margin-top:8px;font-size:0.95rem">nossas fotos simples, mas com memorias incriveis.</p>
+    </section>
+
+    <section class="card" id="motivos">
+      <h3 style="margin-bottom:10px">Motivos para te amar</h3>
+      <div class="motivos">
+        <div class="motivo"><div class="num">1</div><div><strong>Seu sorriso</strong><div style="opacity:.85;margin-top:6px">Você transforma um dia comum no melhor</div></div></div>
+        <div class="motivo"><div class="num">2</div><div><strong>Seu cuidado</strong><div style="opacity:.85;margin-top:6px">Mesmo nas pequenas coisas você se dedica</div></div></div>
+        <div class="motivo"><div class="num">3</div><div><strong>Sua voz</strong><div style="opacity:.85;margin-top:6px">É o som que eu quero ouvir antes de dormir</div></div></div>
+        <div class="motivo"><div class="num">4</div><div><strong>Seus abraços</strong><div style="opacity:.85;margin-top:6px">O lugar onde eu me sinto seguro</div></div></div>
+        <div class="motivo"><div class="num">5</div><div><strong>Você sendo você</strong><div style="opacity:.85;margin-top:6px">Autêntica, simples e verdadeira — eu amo isso</div></div></div>
+        <div class="motivo"><div class="num">6</div><div><strong>Seus olhos</strong><div style="opacity:.85;margin-top:6px">brilham como estrelas</div></div></div>
+        <div class="motivo"><div class="num">7</div><div><strong>Sua simplicidade</strong><div style="opacity:.85;margin-top:6px">Você transforma um momento bobo em memorias eternas</div></div></div>
+        <div class="motivo"><div class="num">8</div><div><strong>Seu jeito de me amar</strong><div style="opacity:.85;margin-top:6px">pois voce me ama de um jeito que ninguem nunca amou</div></div></div>
+        <div class="motivo"><div class="num">9</div><div><strong>Seu toque</strong><div style="opacity:.85;margin-top:6px">seu toque lembra que eu existo</div></div></div>
+        <div class="motivo"><div class="num">10</div><div><strong>voce por inteiro</strong><div style="opacity:.85;margin-top:6px">me faz querer viver, ficar, me faz querer ser melhor</div></div></div>
+      </div>
+      <p style="opacity:.8;margin-top:8px;font-size:0.95rem">ficaria até o infinito falando motivos para te amar, pois eles nao cabam, so aumentam.</p>
+    </section>
+
+    <section class="card" id="carta">
+      <h3 style="margin-bottom:10px">Minha carta para você</h3>
+      <div class="carta" id="cartaTexto" aria-live="polite"></div>
+      <p class="final-phrase" id="finalPhrase">✨ Que isso seja apenas o começo de algo inesquecível, espero que goste. ✨</p>
+      <div style="text-align:center;margin-top:12px">
+        <button id="replay" class="btn">Reescrever</button>
+        <button id="downloadCarta" class="btn primary">📥 Baixar carta (txt)</button>
+      </div>
+    </section>
+
+    <section id="maisCoisasEmbed" class="card" style="padding:12px;">
+      <style>
+        #maisCoisasEmbed .section-row{display:flex;flex-direction:column;gap:12px}
+        @media(min-width:880px){ #maisCoisasEmbed .section-row{flex-direction:row} }
+        .mt-card{flex:1;background:var(--card-bg);padding:12px;border-radius:12px;border:1px solid var(--border-color)}
+        .timeline{list-style:none;padding:0;margin:0;font-size:0.95rem}
+        .timeline li{margin-bottom:8px}
+        .short-msgs{display:flex;gap:8px;overflow:auto;padding-bottom:6px}
+        .msg{flex:0 0 220px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);min-height:80px;display:flex;align-items:center;justify-content:center;font-weight:600}
+        body.light .msg{background:rgba(0,0,0,0.04)}
+        .goals ul{list-style:disc;margin-left:18px}
+        .title-sm{font-weight:800;margin-bottom:8px}
+      </style>
+
+      <h3 style="margin-bottom:10px">Mais coisas — Nossas memórias</h3>
+      <div class="section-row">
+        <div class="mt-card" style="min-width:250px">
+          <div class="title-sm">datas especiais</div>
+          <ul class="timeline">
+            <li><strong>Dia 9 de dezembro 2024:</strong> primeira conversa</li>
+            <li><strong>Dia 19 de dezembro 2025:</strong> primeira vez juntos pessoalmente</li>
+            <li><strong>Dia 6 de fevereiro 2025:</strong> primeiro beijo, e se vendo depois das férias</li>
+            <li><strong>Dia 31 de março 2025:</strong> pedido de namoro.</li>
+            <li><strong>Dia 12 de junho 2025:</strong> dia dos namorados, e primeiro encontro.</li>
+            <li><strong>Dia 23 de julho 2025:</strong> seu aniversario</li>
+            <li><strong>Dia 25 de novembro 2025:</strong> Um marco que guardamos com carinho, a nossa aliança.</li>
+            <li><strong>Dia 9 de novembro 2025:</strong> 1 ano de conversa.</li>
+          </ul>
+        </div>
+
+        <div class="mt-card" style="min-width:280px">
+          <div class="title-sm">Mensagens Curtas</div>
+          <div class="short-msgs">
+            <div class="msg">voce é incrivel.</div>
+            <div class="msg">Cada pedaço carrega uma lembrança nossa.</div>
+            <div class="msg">Você é meu lugar preferido.</div>
+            <div class="msg">Obrigado por cada momento.</div>
+          </div>
+        </div>
+
+        <div class="mt-card goals" style="min-width:240px">
+          <div class="title-sm">Nossas Metas</div>
+          <ul>
+            <li><strong>nosso maior sonho</strong> heleninha.</li>
+            <li><strong>ficar juntos</strong> para sempre.</li>
+            <li><strong>casar</strong> juntos, em um só.</li>
+            <li><strong> boas memórias</strong> e nos divertir no processo.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="player" role="region" aria-label="Player">
+    <div class="cover"><img id="playerCover" src="https://i.scdn.co/image/ab67616d0000b2730e39e0b5b70d4890aa5e8096" alt="cover" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"></div>
+    <div class="info">
+      <div class="title" id="trackTitle">Meu Novo Mundo — Charlie Brown Jr.</div>
+      <div class="artist" id="trackArtist">Jaaziel — Para Évilin</div>
+      <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+    </div>
+    <div class="controls" aria-hidden="true">
+      <button id="prev" class="icon-btn">⏮️</button>
+      <button id="play" class="icon-btn">▶️</button>
+      <button id="next" class="icon-btn">⏭️</button>
+    </div>
+  </div>
+  </div>
+
+<audio id="audio" preload="metadata" src="/Charlie_Brown_Jr_-_Meu_Novo_Mundo_(mp3.pm).mp3"></audio>
+
+<div id="end-screen">
+  <div class="end-content">
+    <h2>Obrigado por chegar até aqui ❤️</h2>
+    <p>Isso significa mais do que você imagina.</p>
+    <p>Obrigado por tudo, que venham mais e mais anos.</p>
+  </div>
+</div>
+
+<script>
+/* ================== CONFIG ================== */
+const CORRECT_PW = "bicudinha"; // Mantido, mas não usado
+const audio = document.getElementById('audio');
+
+/* ELEMENTS */
+const overlay = document.getElementById('overlay');
+const playBtn = document.getElementById('play');
+const playMain = document.getElementById('playMain');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const progressBar = document.getElementById('progressBar');
+const gallery = document.getElementById('gallery');
+const cartaTexto = document.getElementById('cartaTexto');
+const replay = document.getElementById('replay');
+const downloadCarta = document.getElementById('downloadCarta');
+const copyLinkBtn = document.getElementById('copyLink');
+const toggleHearts = document.getElementById('toggleHearts');
+const finalPhrase = document.getElementById('finalPhrase');
+
+
+/* O OVERLAY DE SENHA ESTÁ INVISÍVEL POR PADRÃO.
+   A página principal agora é carregada diretamente, e a música tenta tocar
+   assim que o JS é executado (sujeito às restrições de autoplay do navegador).
+*/
+
+// Tenta tocar a música assim que o script é carregado
+audio.play().catch(e => {
+    if (e.name === 'NotAllowedError') {
+         // O navegador bloqueou o autoplay, o usuário deve clicar no play
+    } else if (e.name === 'NotSupportedError') {
+        alert('O formato do arquivo de música não é suportado pelo seu navegador.');
+    }
+});
+
+
+/* ===== audio player controls (MANTIDO) ===== */
+function togglePlay(){
+  if (audio.error) {
+     alert('O áudio não pôde ser carregado. Verifique o caminho do arquivo mp3.');
+     return;
+  }
+  if(audio.paused){
+    audio.play();
+    playBtn.textContent = '⏸️';
+    playMain.textContent = '⏸️ Pausar';
+  } else {
+    audio.pause();
+    playBtn.textContent = '▶️';
+    playMain.textContent = '▶️ Tocar música';
+  }
+}
+playBtn.addEventListener('click', togglePlay);
+playMain.addEventListener('click', togglePlay);
+
+prevBtn.addEventListener('click', ()=>{ audio.currentTime = Math.max(0, audio.currentTime - 10); });
+nextBtn.addEventListener('click', ()=>{ audio.currentTime = Math.min(audio.duration||0, audio.currentTime + 10); });
+
+audio.addEventListener('timeupdate', ()=>{
+  if(!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  progressBar.style.width = pct + '%';
+});
+audio.addEventListener('play', ()=>{ playBtn.textContent = '⏸️'; });
+audio.addEventListener('pause', ()=>{ playBtn.textContent = '▶️'; });
+
+/* Avisa se o áudio não puder ser carregado */
+audio.addEventListener('error', function(e) {
+    console.error("Erro ao carregar áudio:", e);
+    playBtn.textContent = '❌';
+    playMain.textContent = '❌ Erro no Áudio';
+    alert('ERRO: O arquivo de música não foi encontrado! Verifique se o arquivo MP3 está na mesma pasta que o HTML ou se o link externo está correto.');
+    playBtn.disabled = true;
+    playMain.disabled = true;
+});
+
+
+/* ===== gallery click to open image (mobile friendly) (MANTIDO) ===== */
+gallery.addEventListener('click', (e)=>{
+  const img = e.target.closest('img');
+  if(!img) return;
+  const src = img.src;
+  const viewer = document.createElement('div');
+  viewer.style.position='fixed'; viewer.style.inset='0'; viewer.style.background='rgba(0,0,0,0.95)';
+  viewer.style.display='flex'; viewer.style.alignItems='center'; viewer.style.justifyContent='center'; viewer.style.zIndex=2000;
+  const big = document.createElement('img'); big.src = src; big.style.maxWidth='96%'; big.style.maxHeight='92%'; big.style.borderRadius='10px'; big.style.objectFit='contain'; 
+  viewer.appendChild(big);
+  viewer.addEventListener('click', ()=> viewer.remove());
+  document.body.appendChild(viewer);
+});
+
+/* ===== Image error handling (AVISO SOBRE AS FOTOS) (MANTIDO) ===== */
+document.querySelectorAll('img').forEach(img => {
+  img.onerror = function() {
+    console.error("Erro ao carregar imagem: ", this.src);
+    // Substitui por um placeholder local para evitar quebra de layout
+    this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="#2d2d2d"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="12" fill="#fff">Foto não encontrada</text></svg>';
+    this.alt = 'Imagem não carregada';
+  };
+});
+
+/* ===== carta typing (texto fornecido) (MANTIDO) ===== */
+const cartaText = `Évilin...
+
+Desde o dia 9 de dezembro, tudo em mim começou a mudar de um jeito que eu nem sabia explicar.
+No começo eram só mensagens, risadas, curiosidades…
+Mas aos poucos você foi virando parte do meu dia, da minha rotina, do meu pensamento.
+
+Teve dias difíceis.
+Teve medo.
+Teve insegurança.
+Teve silêncio.
+Mas mesmo assim, meu coração sempre voltava pra você.
+
+Hoje, depois de 1 ano conversando com você, eu vejo o quanto eu mudei.
+Aprendi a ter paciência.
+Aprendi a cuidar.
+Aprendi a sentir de verdade.
+Aprendi o que é gostar de alguém com o coração inteiro.
+
+Você virou meu pensamento antes de dormir.
+Meu sorriso sem perceber.
+Minha saudade sem explicação.
+Meu motivo de tentar ser melhor.
+
+Nada foi perfeito.
+Mas tudo foi real.
+E isso é o que mais importa pra mim.
+
+Se um dia tudo mudar, se a vida seguir outros caminhos, eu ainda vou poder dizer com orgulho:
+Eu senti de verdade.
+Eu amei de verdade.
+Eu vivi de verdade.
+
+Obrigado por cada conversa.
+Obrigado por cada momento.
+Obrigado por cada sentimento.
+Obrigado por existir.
+Obrigado por ser você.
+
+Com todo meu carinho,
+Jaaziel ❤️`;
+
+function typeCarta(speed=18){
+  cartaTexto.textContent = '';
+  finalPhrase.style.opacity = 0; 
+  let k=0;
+  const t = setInterval(()=>{
+    if(k < cartaText.length) cartaTexto.textContent += cartaText.charAt(k++);
+    else {
+      clearInterval(t);
+      finalPhrase.style.opacity = 0.9; 
+    }
+  }, speed);
+}
+replay.addEventListener('click', ()=> typeCarta(12));
+typeCarta(18);
+
+/* ===== download carta txt (MANTIDO) ===== */
+downloadCarta.addEventListener('click', ()=>{
+  const blob = new Blob([cartaText], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'carta-jaaziel-evilin.txt'; document.body.appendChild(a); a.click();
+  URL.revokeObjectURL(url); a.remove();
+});
+
+/* ===== copy link (MANTIDO) ===== */
+copyLinkBtn.addEventListener('click', async ()=>{
+  try{
+    await navigator.clipboard.writeText(location.href);
+    alert('Link copiado para a área de transferência!');
+  }catch(e){
+    prompt('Copie este link:', location.href);
+  }
+});
+
+/* ===== hearts toggle (simple) (MANTIDO) ===== */
+let heartsOn = true;
+toggleHearts.addEventListener('click', ()=>{
+  heartsOn = !heartsOn;
+  if(heartsOn){
+    startHearts();
+    toggleHearts.textContent='Corações';
+  } else {
+    stopHearts();
+    toggleHearts.textContent='Sem corações';
+  }
+});
+
+/* ===== small hearts animation (MANTIDO) ===== */
+let heartsInterval;
+function startHearts(){
+  heartsInterval = setInterval(()=>{
+    const s = document.createElement('span');
+    s.textContent = '❤';
+    s.style.position='fixed';
+    s.style.left = Math.random()*90 + 'vw';
+    s.style.bottom = '-4vh';
+    s.style.fontSize = (8 + Math.random()*28) + 'px';
+    s.style.opacity = 0.95;
+    s.style.zIndex = 400;
+    s.style.color = '#ff4d6d'; 
+    document.body.appendChild(s);
+    s.animate([{transform:'translateY(0)', opacity:1},{transform:'translateY(-120vh)', opacity:0}],{duration:7000,easing:'linear'});
+    setTimeout(()=> s.remove(),7400);
+  }, 420);
+}
+function stopHearts(){ clearInterval(heartsInterval); document.querySelectorAll('span').forEach(sp => { if(sp.textContent==='❤') sp.remove(); }); }
+startHearts(); 
+
+/* ===== accessibility: close overlay with ESC (MANTIDO, mas não faz nada útil agora) ===== */
+document.addEventListener('keydown', (ev)=>{
+  if(ev.key === 'Escape'){
+    if(overlay.style.display !== 'none'){
+      overlay.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+  }
+});
+
+/* ===== smooth scroll to sections when hero buttons clicked (MANTIDO) ===== */
+document.getElementById('openGallery').addEventListener('click', (e)=> {
+  e.preventDefault();
+  document.getElementById('fotos').scrollIntoView({ behavior: 'smooth' });
+});
+document.getElementById('openMotivos').addEventListener('click', (e)=> {
+  e.preventDefault();
+  document.getElementById('motivos').scrollIntoView({ behavior: 'smooth' });
+});
+
+/* ===== end screen timer (MANTIDO) ===== */
+setTimeout(() => {
+  const endScreen = document.getElementById("end-screen");
+  if(endScreen) endScreen.style.display = "flex";
+}, 65000); 
+
+/* ===== theme toggle logic (MANTIDO) ===== */
+const themeBtn = document.getElementById("theme-toggle");
+
+themeBtn.addEventListener("click", () => {
+  document.body.classList.toggle("light");
+  document.body.classList.toggle("dark");
+
+  localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
+});
+
+// manter tema salvo
+if (localStorage.getItem("theme") === "light") {
+  document.body.classList.add("light");
+  document.body.classList.remove("dark");
+} else {
+  document.body.classList.add("dark");
+  document.body.classList.remove("light");
+}
+
+/* =======================================
+   ANIMAÇÃO DE PARTÍCULAS (MANTIDO)
+   ======================================= */
+const canvas = document.getElementById("particles");
+if (canvas) {
+    const ctx = canvas.getContext("2d");
+    
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const particles = [];
+
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2 + 1,
+        dx: (Math.random() - 0.5) * 0.3,
+        dy: (Math.random() - 0.5) * 0.3
+      });
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0, 255, 106, 0.4)"; 
+        ctx.fill();
+
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+      }
+
+      requestAnimationFrame(animateParticles);
+    }
+
+    animateParticles();
+}
+</script>
+
+</body>
+</html>
